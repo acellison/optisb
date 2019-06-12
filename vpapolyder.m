@@ -1,0 +1,39 @@
+function [a,b] = vpapolyder(u,v)
+%VPAPOLYDER Differentiate polynomial.
+%   VPAPOLYDER(P) returns the derivative of the polynomial whose
+%   coefficients are the elements of vector P.
+%
+%   VPAPOLYDER(A,B) returns the derivative of polynomial A*B.
+%
+%   [Q,D] = VPAPOLYDER(B,A) returns the derivative of the
+%   polynomial ratio B/A, represented as Q/D.
+%
+%   Class support for inputs u, v:
+%      float: double, single, sym
+%
+%   See also POLYINT, CONV, DECONV.
+
+%   Copyright 1984-2007 The MathWorks, Inc.
+
+if nargin < 2, v = 1; end
+
+if ~isa(u,'sym'), u = cast(u,'sym'); end
+if ~isa(v,'sym'), v = cast(v,'sym'); end
+u = u(:).'; v = v(:).';
+nu = length(u); nv = length(v);
+if nu < 2, up = 0; else, up = u(1:nu-1) .* (nu-1:-1:1); end
+if nv < 2, vp = 0; else, vp = v(1:nv-1) .* (nv-1:-1:1); end
+a1 = vpaconv(up,v); a2 = vpaconv(u,vp);
+i = length(a1); j = length(a2); z = zeros(1,abs(i-j),class(u));
+if i > j, a2 = [z a2]; elseif i < j, a1 = [z a1]; end
+if nargout < 2, a = a1 + a2; else, a = a1 - a2; end
+f = find(a ~= 0);
+if ~isempty(f), a = a(f(1):end); else, a = zeros(superiorfloat(u,v)); end
+b = vpaconv(v,v);
+f = find(b ~= 0);
+if ~isempty(f), b = b(f(1):end); else, b = zeros(class(v)); end
+%  The vector may be too long when the polynomial coefficients
+%  include NaN, so trim the leading element.
+if length(a) > max(nu + nv - 2,1)
+  a = a(2:end);
+end

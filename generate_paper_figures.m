@@ -1,0 +1,7 @@
+clear; close all;
+
+generate_rk_domains
+generate_optimized_domains
+generate_ratcoef_schemes
+generate_leading_error
+generate_convergence_plot
